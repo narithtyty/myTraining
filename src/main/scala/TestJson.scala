@@ -1,6 +1,8 @@
 import spray.json.RootJsonFormat
 import spray.json.DefaultJsonProtocol._
-object TestJson extends App{
+import akka.http.scaladsl.server.Directives
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+object TestJson extends App with Directives with SprayJsonSupport {
   case class Address(street: String, city: String)
   case class Person(name: String, address: Address)
 

@@ -10,6 +10,7 @@ import models.repository._
 import spray.json.{JsonFormat, RootJsonFormat}
 import spray.json.RootJsonFormat
 import spray.json.DefaultJsonProtocol._
+import jsonSupport._
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
@@ -21,7 +22,8 @@ class UserEndpoint(repository: UserRepository)(implicit ec: ExecutionContext, ma
       get { // --get ("api/users")
         onComplete(repository.getData()) {
           case Success(value) =>
-            complete(value) //SuccessResponse(value)
+            //complete(value)
+           SuccessResponse(value)
           case Failure(e) =>
             complete(s"Fail with: ${e.getMessage}")
         }
@@ -35,11 +37,7 @@ class UserEndpoint(repository: UserRepository)(implicit ec: ExecutionContext, ma
           case Failure(e) =>
             complete(s"Fail with: ${e.getMessage}")
         }
-      } ~ post { // post -------("api/users/1")
-//        onComplete(repository.testSave(id.toInt)) {
-//          case Success(c) => complete(c.toString)
-//          case Failure(e) => complete(s"Fail with: ${e.getMessage}")
-//        }
+      } ~ post {
           entity(as[requestUserEdit]){
              userEdit =>
                val success1=repository.update(id.toInt,userEdit)
@@ -58,12 +56,3 @@ class UserEndpoint(repository: UserRepository)(implicit ec: ExecutionContext, ma
   }
   }
 
-
-case class SuccessResponseWrapper[T](data1: T)    /// name data1
-object SuccessResponseWrapper extends SprayJsonSupport {
-  implicit def successResponseFormat[T: JsonFormat]: RootJsonFormat[SuccessResponseWrapper[T]] = jsonFormat1(SuccessResponseWrapper.apply[T])
-}
-object SuccessResponse {
-  import akka.http.scaladsl.server.Directives._
-  def apply[T: JsonFormat](data: T) = complete(SuccessResponseWrapper(data))
-}
